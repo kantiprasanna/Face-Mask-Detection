@@ -29,7 +29,7 @@ Train:
 Python-files :
 
 
-    FaceMaakDetectionModel.ipynb          :  model training
+    FaceMaskDetectionModel.ipynb          :  model training
     
     image_input.py                        :  to detect whether the obtained image is with-mask or without-mask
     
