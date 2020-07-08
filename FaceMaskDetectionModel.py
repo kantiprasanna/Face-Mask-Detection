@@ -59,25 +59,31 @@ for i in trainImages:
   train.append(img)
   labels.append(label)
 
+#Loaing the images into numpy array
 train = np.array(train)
 labels = np.array(labels)
 
+#Converting labels numpy array as a categorical data
 from sklearn.preprocessing import LabelBinarizer
 from keras.utils.np_utils import to_categorical   
 lb = LabelBinarizer()
 labels = lb.fit_transform(labels)
 labels = to_categorical(labels)
 
+#Spliting the data into train and test datasets
 from sklearn.model_selection import train_test_split
 X_Train, X_Test, y_train, y_test = train_test_split(train, labels, train_size = 0.75, random_state = 40, stratify = labels)
 
 print(X_Train.shape, X_Test.shape, y_train.shape, y_test.shape)
 
+#Image Data Generator is used to generate different images from the train data while passing multiple times to model
 IDG = ImageDataGenerator(rotation_range = 50, width_shift_range = 0.5, height_shift_range = 0.5, horizontal_flip = True, vertical_flip = True, fill_mode = 'nearest')
 
+#Input is passed to Mobilevnet2 algorithm to train the model
 from tensorflow.keras.applications import MobileNetV2
 base = MobileNetV2(alpha = 1.0, include_top = False, weights = 'imagenet',input_tensor = Input(shape = (224, 224, 3)), classes = 2)
 
+#Second layer of the model is being given layers to train
 finalModel = base.output
 from tensorflow.keras.layers import AveragePooling2D, Dropout, Flatten, Dense
 finalModel = AveragePooling2D(pool_size=(7, 7))(finalModel)
@@ -86,29 +92,40 @@ finalModel = Dense(128, activation = "relu")(finalModel)
 finalModel = Dropout(0.5)(finalModel)
 finalModel = Dense(2, activation = "softmax")(finalModel)
 
+#Adding first layer and second layer of the models
 model = Model(inputs = base.input, outputs = finalModel)
 
+#Making the base layers as non trainable
 for layers in base.layers:
   layers.trainable = False
 
+#Setting learning rate, epochs (the number of times the data is passed to model), and batch size
 INIT_LR = 1e-4
 EPOCHS = 40
 BS = 32
+
+#Adamax is a optimizer which is used to optimize the model
 from tensorflow.keras.optimizers import Adamax
 model.compile(loss = "categorical_crossentropy", optimizer = Adamax(lr = INIT_LR, decay = INIT_LR // EPOCHS), metrics = ["accuracy"])
 
+#Fitting the main model on the train data
 main = model.fit(IDG.flow(X_Train, y_train, batch_size = BS), validation_data = (X_Test, y_test), validation_steps = len(X_Test) // BS, epochs = EPOCHS, steps_per_epoch = len(X_Train) // BS)
 
+#Predicting the output on test data from the trained model
 y_pred = model.predict(x = X_Test, batch_size = BS)
 
+#Setting the value as maximum that is depending on the percentage of mask present predicting it as mask present or not present
 y_pred = np.argmax(y_pred, axis=1)
 
+#Setting the value as maximum that is depending on the percentage of mask present predicting it as mask present or not present
 y_test = y_test.argmax(axis = 1)
 
+#Predicting accuracy
 from sklearn.metrics import r2_score
 r_squared = r2_score(y_test, y_pred)
 
 print(r_squared)
 
+#Saving the model
 model.save('finalversion.h5')
 
