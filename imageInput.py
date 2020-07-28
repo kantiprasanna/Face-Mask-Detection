@@ -30,7 +30,7 @@ cv2.destroyAllWindows() # closes all the opened windows
 img = Image.fromarray(frame) # converts numpy-array to image 
 img.save("test.png")  # saves the image to local memory
 
-model =  load_model("finalVersion")    # loads the trained model
+model =  load_model("finalVersion.h5")    # loads the trained model
 img_path = "test.png"     # path of the image which we saved previously
 
 face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')  # loads the classifier used to detect frontal-face
@@ -47,6 +47,7 @@ for (x, y, w, h) in faces:
     face = preprocess_input(face)  # adequates the image to the format which the model requires
     face = np.expand_dims(face, axis=0)   # expands the shape of the array
     (mask, withoutMask) = model.predict(face)[0]   # predicts the output and the values are stored in mask and withoutMask
+    print(mask, withoutMask)
     label = "Mask" if mask > withoutMask else "No Mask"   # checks whether the input image is with-mask or without-mask
     color = (0, 255, 0) if label == "Mask" else (0, 0, 255)    
     label = "{}: {:.2f}%".format(label, max(mask, withoutMask) * 100)   
