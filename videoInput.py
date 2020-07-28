@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 cap = cv2.VideoCapture(0)    # starts the camera 
 cap.set(3,640)         # sets the width of the frame             
 cap.set(4,480)         # sets the height of the frame
-model =  load_model("finalVersion")   # loads the trained model
+model =  load_model("finalVersion.h5")   # loads the trained model
 face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')  # loads the classifier used to detect frontal-face
 
 
